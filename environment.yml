@@ -1,0 +1,15 @@
+name: fun_with_load_testing
+channels:
+- !!python/unicode
+  'defaults'
+- !!python/unicode
+  'bokeh/channel/dev'
+dependencies:
+- python=2.7
+- bokeh=0.12.6dev7
+- matplotlib=2.0.2
+- pandas=0.20.1
+- pip:
+  - locustio==0.7.5
+
+
