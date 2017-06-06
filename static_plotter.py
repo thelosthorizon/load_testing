@@ -19,7 +19,6 @@ logging.basicConfig(
 
 LOGGER = logging.getLogger(__name__)
 
-COLORS = "bgrcmykw"
 RESULTS_DIR = os.path.join(os.path.dirname(__file__), "results")
 
 
@@ -29,26 +28,41 @@ def success_histogram(filename):
     """
     try:
         df = pd.read_csv(
-            os.path.join(RESULTS_DIR, filename), header=None)
+            os.path.join(RESULTS_DIR, filename),
+            names=["Name", "RequestType", "ResponseTime"])
     except pd.errors.EmptyDataError:
         LOGGER.info("Empty csv file")
         return
-    for i in range(1, 5):
-        filtered_data = (df.loc[df[0] == 'endpoint{}'.format(i)])
-        plt.hist(
-            filtered_data[2],
-            histtype='stepfilled',
-            bins=50,
-            label='endpoint{}'.format(i),
-            alpha=1.0 if i == 1 else 0.5,
-            color=COLORS[i-1])
-    plt.title("response time for different endpoints")
-    plt.xlabel("response time")
-    plt.ylabel("count")
-    plt.legend()
-    fig = plt.gcf()
-    fig.set_size_inches(11.69, 8.27)
-    plt.savefig(
+    grouped = df["ResponseTime"].groupby(df["Name"])
+    LOGGER.info("Stats: %s", str(grouped.describe()))
+    means = grouped.mean()
+    errors = grouped.std()
+    ax2 = means.plot.bar(
+        yerr=errors,
+        legend=False,
+        figsize=(11.69, 8.27),
+        title="Average Response Time For Different Endpoints",
+        )
+    ax2.set_xlabel("Endpoints")
+    ax2.set_ylabel("Average Response Time")
+    fig2 = ax2.get_figure()
+    fig2.savefig(
+        os.path.join(
+                RESULTS_DIR,
+                'success_bar_{}.png'.format(settings.CUR_TIME)),
+        bbox_inches='tight',
+        dpi=300)
+    plt.cla()
+    for name, group in grouped:
+        ax = group.plot.hist(
+            figsize=(11.69, 8.27),
+            label=name,
+            legend=True,
+            title="Response Time Histogram")
+    ax.set_xlabel("Response Time")
+    ax.set_ylabel("Count")
+    fig = ax.get_figure()
+    fig.savefig(
         os.path.join(
                 RESULTS_DIR,
                 'success_hist_{}.png'.format(settings.CUR_TIME)),
@@ -68,7 +82,11 @@ def distribution_barchart(filename, save_png=True):
         return
     df2 = df.set_index("Name")
     data = df2.loc["GET /endpoint1":"GET /endpoint4", "50%":"100%"]
-    ax = data.plot.bar(figsize=(11.69, 8.27))
+    ax = data.plot.bar(
+        title="Response Time Percentiles",
+        figsize=(11.69, 8.27))
+    ax.set_xlabel("Endpoints")
+    ax.set_ylabel("Response Time")
     fig = ax.get_figure()
     fig.savefig(
         os.path.join(
