@@ -3,7 +3,7 @@
 """
 Created on Wed May 31 16:45:30 2017
 
-@author: sghimire
+@author: sulav
 
 This module holds all the settings
 """
