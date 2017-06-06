@@ -32,7 +32,7 @@ def process_result(names, save_stats=False):
         if all_locust_hatched:  # Only store data when all locusts have hatched
             cur_endpoint_name = name.split("/")[1]
             request_success_stats.append(
-                    [cur_endpoint_name, request_type, response_time])
+                [cur_endpoint_name, request_type, response_time])
 
     def on_request_fail(
             request_type, name, response_time, exception, **kwargs):
